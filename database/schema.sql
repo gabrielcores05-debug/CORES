@@ -78,7 +78,7 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
 -- Inserción de Usuario Administrador Inicial
 -- Contraseña: admin123
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role_id`, `phone`, `position`, `status`) VALUES
-(1, 'Administrador CORES', 'admin@cores.com', '$2y$10$gPsp0dD0i0r68aYm.yR85OB3hN6kUk9v5TkhO0eH4FhHq8zMhFZeO', 1, '+57 300 000 0000', 'Director General', 'active')
+(1, 'Administrador CORES', 'admin@cores.com', '$2y$10$RBa9fyMVJZpjdv8Iea3rOuANWED5dkNDSQDCyssQTRxW5zNdSuqEy', 1, '+57 300 000 0000', 'Director General', 'active')
 ON DUPLICATE KEY UPDATE `email` = VALUES(`email`);
 
 -- Inserción de Proyectos de Prueba Iniciales

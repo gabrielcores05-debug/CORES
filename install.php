@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install_db'])) {
 
         -- Inserción de Usuario Admin (admin@cores.com / admin123)
         INSERT IGNORE INTO `users` (`id`, `name`, `email`, `password`, `role_id`, `phone`, `position`, `status`) VALUES
-        (1, 'Administrador CORES', 'admin@cores.com', '$2y$10\$gPsp0dD0i0r68aYm.yR85OB3hN6kUk9v5TkhO0eH4FhHq8zMhFZeO', 1, '+57 300 000 0000', 'Coordinador General', 'active');
+        (1, 'Administrador CORES', 'admin@cores.com', '$2y$10$RBa9fyMVJZpjdv8Iea3rOuANWED5dkNDSQDCyssQTRxW5zNdSuqEy', 1, '+57 300 000 0000', 'Coordinador General', 'active');
 
         -- Inserción de Proyectos de Ejemplo
         INSERT IGNORE INTO `projects` (`id`, `title`, `code`, `category`, `description`, `budget`, `status`, `progress`, `start_date`, `end_date`, `created_by`) VALUES
