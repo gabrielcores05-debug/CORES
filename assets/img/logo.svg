@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 550" width="100%" height="100%">
+  <defs>
+    <!-- Gradiente Naranja -->
+    <linearGradient id="coresOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFB703"/>
+      <stop offset="50%" stop-color="#FB8500"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+
+    <!-- Gradiente Azul / Cian -->
+    <linearGradient id="coresCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+
+    <!-- Gradiente Estrella Dorada -->
+    <linearGradient id="coresStar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0284C7" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- SÍMBOLO PRINCIPAL (Burbuja / Red) -->
+  <g transform="translate(250, 160)" filter="url(#subtleGlow)">
+    <!-- Arco / Burbuja Naranja Exterior con Puntero de Chat -->
+    <path d="M -95 10 A 105 105 0 1 0 75 75 L 85 95 L -75 95 L -105 10 Z" fill="none" stroke="url(#coresOrange)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Anillo Naranja Interior -->
+    <path d="M -70 5 A 75 75 0 1 0 55 55" fill="none" stroke="url(#coresOrange)" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Ondas de Señal WiFi / Telecom (Cian / Azul) -->
+    <!-- Onda 1 Exterior -->
+    <path d="M 65 -75 A 115 115 0 0 1 125 0" fill="none" stroke="url(#coresCyan)" stroke-width="14" stroke-linecap="round"/>
+    
+    <!-- Onda 2 Media -->
+    <path d="M 50 -55 A 85 85 0 0 1 95 0" fill="none" stroke="url(#coresCyan)" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Punto de señal -->
+    <circle cx="45" cy="-20" r="7" fill="url(#coresCyan)"/>
+
+    <!-- Estrella Central Dorada -->
+    <path d="M 0 -38 L 11 -12 L 38 -12 L 16 4 L 24 30 L 0 15 L -24 30 L -16 4 L -38 -12 L -11 -12 Z" fill="url(#coresStar)" stroke="#F59E0B" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+
+  <!-- TEXTO: CORES -->
+  <text x="250" y="380" font-family="'Space Grotesk', 'Plus Jakarta Sans', Arial, sans-serif" font-size="78" font-weight="900" text-anchor="middle" fill="url(#coresCyan)" letter-spacing="4">CORES</text>
+
+  <!-- TEXTO: COMUNICACIONES S.A.S. -->
+  <text x="250" y="425" font-family="'Space Grotesk', 'Plus Jakarta Sans', Arial, sans-serif" font-size="24" font-weight="800" text-anchor="middle" fill="url(#coresOrange)" letter-spacing="3">COMUNICACIONES S.A.S.</text>
+
+  <!-- Línea de acento cian -->
+  <line x1="80" y1="438" x2="420" y2="438" stroke="url(#coresCyan)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- ESLOGAN OFICIAL -->
+  <text x="250" y="475" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#64748B" letter-spacing="2">CONECTAMOS TU MUNDO, IMPULSAMOS TU VIDA</text>
+</svg>

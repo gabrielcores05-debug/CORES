@@ -1,94 +1,80 @@
 <?php
-// app/billing.php - Lógica de Negocio y Reglas de Facturación para CORES
+// app/billing.php - Lógica de Negocio y Reglas de Facturación para CORES COMUNICACIONES S.A.S.
 require_once __DIR__ . '/../config/database.php';
 
-// Obtener todas las métricas del Dashboard en tiempo real desde la BD
+// Obtener todas las métricas del Dashboard en tiempo real desde la Base de Datos (MySQL / MariaDB)
 function getDashboardMetrics($period = 'month', $custom_start = null, $custom_end = null) {
-    $db = getDBConnection();
-    if (!$db) {
-        return [
-            'total_users' => 0,
-            'active_users' => 0,
-            'suspended_users' => 0,
-            'pending_users' => 0,
-            'paid_invoices_count' => 0,
-            'pending_invoices_count' => 0,
-            'total_collected' => 0,
-            'period_collected' => 0,
-            'month_collected' => 0
-        ];
-    }
+    $metrics = [
+        'total_users' => 0,
+        'active_users' => 0,
+        'suspended_users' => 0,
+        'pending_users' => 0,
+        'paid_invoices_count' => 0,
+        'pending_invoices_count' => 0,
+        'total_collected' => 0.0,
+        'period_collected' => 0.0,
+        'month_collected' => 0.0
+    ];
 
-    // 1. Conteo de usuarios por estado
-    $total_users = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client'")->fetchColumn();
-    $active_users = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'ACTIVO'")->fetchColumn();
-    $suspended_users = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'SUSPENDIDO'")->fetchColumn();
-    $pending_users = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'PENDIENTE DE PAGO'")->fetchColumn();
-
-    // 2. Conteo de facturas
-    $paid_invoices_count = (int)$db->query("SELECT COUNT(*) FROM invoices WHERE status = 'PAGADO'")->fetchColumn();
-    $pending_invoices_count = (int)$db->query("SELECT COUNT(*) FROM invoices WHERE status IN ('PENDIENTE', 'VENCIDO')")->fetchColumn();
-
-    // 3. Recaudo Total Acumulado (histórico real)
-    $total_collected = (float)$db->query("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO'")->fetchColumn();
-
-    // 4. Recaudo del Mes Actual
-    $current_year = date('Y');
-    $current_month = date('m');
-    $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND strftime('%Y', payment_date) = ? AND strftime('%m', payment_date) = ?");
-    // Soporte para MySQL y SQLite
     try {
+        $db = getDBConnection();
+        if (!$db) {
+            return $metrics;
+        }
+
+        // 1. Conteo de usuarios por estado
+        $metrics['total_users'] = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client'")->fetchColumn();
+        $metrics['active_users'] = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'ACTIVO'")->fetchColumn();
+        $metrics['suspended_users'] = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'SUSPENDIDO'")->fetchColumn();
+        $metrics['pending_users'] = (int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'PENDIENTE DE PAGO'")->fetchColumn();
+
+        // 2. Conteo de facturas
+        $metrics['paid_invoices_count'] = (int)$db->query("SELECT COUNT(*) FROM invoices WHERE status = 'PAGADO'")->fetchColumn();
+        $metrics['pending_invoices_count'] = (int)$db->query("SELECT COUNT(*) FROM invoices WHERE status IN ('PENDIENTE', 'VENCIDO')")->fetchColumn();
+
+        // 3. Recaudo Total Acumulado (histórico real)
+        $metrics['total_collected'] = (float)$db->query("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO'")->fetchColumn();
+
+        // 4. Recaudo del Mes Actual (Compatible con MySQL y MariaDB)
+        $current_year = (int)date('Y');
+        $current_month = (int)date('m');
+
         $stmt_m = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND YEAR(payment_date) = ? AND MONTH(payment_date) = ?");
         $stmt_m->execute([$current_year, $current_month]);
-        $month_collected = (float)$stmt_m->fetchColumn();
-    } catch (Exception $e) {
-        $stmt->execute([$current_year, $current_month]);
-        $month_collected = (float)$stmt->fetchColumn();
-    }
+        $metrics['month_collected'] = (float)$stmt_m->fetchColumn();
 
-    // 5. Recaudo según filtro de periodo (Día, Semana, Mes, Año, Personalizado)
-    $period_collected = $month_collected;
-    if ($period === 'today') {
-        $today = date('Y-m-d');
-        $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND payment_date = ?");
-        $stmt->execute([$today]);
-        $period_collected = (float)$stmt->fetchColumn();
-    } elseif ($period === 'week') {
-        $week_start = date('Y-m-d', strtotime('monday this week'));
-        $week_end = date('Y-m-d', strtotime('sunday this week'));
-        $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND payment_date BETWEEN ? AND ?");
-        $stmt->execute([$week_start, $week_end]);
-        $period_collected = (float)$stmt->fetchColumn();
-    } elseif ($period === 'year') {
-        try {
+        // 5. Recaudo según filtro de periodo (Día, Semana, Mes, Año, Personalizado)
+        $metrics['period_collected'] = $metrics['month_collected'];
+
+        if ($period === 'today') {
+            $today = date('Y-m-d');
+            $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND DATE(payment_date) = ?");
+            $stmt->execute([$today]);
+            $metrics['period_collected'] = (float)$stmt->fetchColumn();
+        } elseif ($period === 'week') {
+            $week_start = date('Y-m-d', strtotime('monday this week'));
+            $week_end = date('Y-m-d', strtotime('sunday this week'));
+            $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND payment_date BETWEEN ? AND ?");
+            $stmt->execute([$week_start, $week_end]);
+            $metrics['period_collected'] = (float)$stmt->fetchColumn();
+        } elseif ($period === 'year') {
             $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND YEAR(payment_date) = ?");
             $stmt->execute([$current_year]);
-            $period_collected = (float)$stmt->fetchColumn();
-        } catch (Exception $e) {
-            $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND strftime('%Y', payment_date) = ?");
-            $stmt->execute([$current_year]);
-            $period_collected = (float)$stmt->fetchColumn();
+            $metrics['period_collected'] = (float)$stmt->fetchColumn();
+        } elseif ($period === 'custom' && $custom_start && $custom_end) {
+            $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND payment_date BETWEEN ? AND ?");
+            $stmt->execute([$custom_start, $custom_end]);
+            $metrics['period_collected'] = (float)$stmt->fetchColumn();
         }
-    } elseif ($period === 'custom' && $custom_start && $custom_end) {
-        $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'PAGADO' AND payment_date BETWEEN ? AND ?");
-        $stmt->execute([$custom_start, $custom_end]);
-        $period_collected = (float)$stmt->fetchColumn();
+
+    } catch (PDOException $e) {
+        error_log("Error en getDashboardMetrics: " . $e->getMessage());
     }
 
-    return [
-        'total_users' => $total_users,
-        'active_users' => $active_users,
-        'suspended_users' => $suspended_users,
-        'pending_users' => $pending_users,
-        'paid_invoices_count' => $paid_invoices_count,
-        'pending_invoices_count' => $pending_invoices_count,
-        'total_collected' => $total_collected,
-        'period_collected' => $period_collected,
-        'month_collected' => $month_collected
-    ];
+    return $metrics;
 }
 
-// Analizar el estado actual respecto al calendario de facturación
+// Analizar el estado actual respecto al calendario de facturación oficial
 function getBillingCalendarStatus() {
     $current_day = (int)date('j');
     $current_month_name = date('F');
@@ -104,7 +90,7 @@ function getBillingCalendarStatus() {
     $is_suspension_day = ($current_day === SUSPENSION_DAY);
     $is_collection_day = ($current_day === COLLECTION_DAY);
 
-    // Próximo hito
+    // Próximo hito operativo
     if ($current_day < BILLING_DAY) {
         $next_event = "Próximo Hito: Facturación (Día " . BILLING_DAY . ")";
         $days_left = BILLING_DAY - $current_day;
@@ -139,7 +125,7 @@ function getBillingCalendarStatus() {
     ];
 }
 
-// Generar Alertas Dinámicas para el Administrador
+// Generar Alertas Dinámicas para el Administrador según reglas y BD
 function getSystemAlerts() {
     $alerts = [];
     $cal = getBillingCalendarStatus();

@@ -343,7 +343,7 @@ if ($db) {
                     <h3 class="font-bold text-slate-900 text-base mb-3 flex items-center gap-2">
                         <i class="fa-solid fa-map text-cores-blue"></i> Mapa del Municipio de Condoto
                     </h3>
-                    <div class="rounded-2xl overflow-hidden border border-slate-100 bg-slate-950 p-2 mb-4">
+                    <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 p-2 mb-4">
                         <img src="assets/img/condoto_map.png" alt="Mapa Municipal de Condoto Chocó" class="w-full h-auto object-contain max-h-48 mx-auto">
                     </div>
                     <p class="text-xs text-slate-600 leading-relaxed">
